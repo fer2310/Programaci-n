@@ -1,6 +1,6 @@
 # Hecho por: alumnos: Angel Daniel Hernandez Arteaga y Fernando Cruz Calderon
+
 from dataclasses import dataclass
-import flet as ft
 
 
 @dataclass(frozen=True)
@@ -245,101 +245,3 @@ def clasificar_enlace(elemento1: Elemento, elemento2: Elemento):
         return "Covalente", tipo_material_covalente(elemento1, elemento2)
 
     return "No es posible determinar un enlace simple con este par.", None
-
-
-def main(page: ft.Page):
-    page.title = "Enlaces Químicos"
-    page.theme_mode = ft.ThemeMode.DARK
-    page.scroll = ft.ScrollMode.AUTO
-    page.padding = 16
-
-    input_elem1 = ft.TextField(
-        label="Elemento 1 (símbolo, nombre o Z)",
-        hint_text="Ej: Na, sodio o 11",
-        expand=True,
-    )
-    input_elem2 = ft.TextField(
-        label="Elemento 2 (símbolo, nombre o Z)",
-        hint_text="Ej: Cl, cloro o 17",
-        expand=True,
-    )
-
-    mensaje_error = ft.Text(value="", color=ft.Colors.RED_400, visible=False)
-
-    tabla_comparacion = ft.DataTable(
-        visible=False,
-        columns=[
-            ft.DataColumn(ft.Text("Rol")),
-            ft.DataColumn(ft.Text("Z"), numeric=True),
-            ft.DataColumn(ft.Text("Símbolo")),
-            ft.DataColumn(ft.Text("Nombre")),
-            ft.DataColumn(ft.Text("Categoría")),
-            ft.DataColumn(ft.Text("Grupo")),
-        ],
-        rows=[],
-    )
-
-    texto_enlace = ft.Text("", size=18, weight=ft.FontWeight.BOLD)
-    texto_material = ft.Text("", size=15)
-    tarjeta_resultado = ft.Container(
-        visible=False,
-        padding=16,
-        border_radius=12,
-        bgcolor=ft.Colors.BLUE_GREY_900,
-        content=ft.Column([texto_enlace, texto_material], spacing=6),
-    )
-
-    def calcular_click(e):
-        e1 = resolver_elemento(input_elem1.value or "")
-        e2 = resolver_elemento(input_elem2.value or "")
-
-        if e1 is None or e2 is None:
-            mensaje_error.value = "Verifica los nombres, símbolos o números atómicos (1 a 118)."
-            mensaje_error.visible = True
-            tabla_comparacion.visible = False
-            tarjeta_resultado.visible = False
-            page.update()
-            return
-
-        mensaje_error.visible = False
-        enlace, material = clasificar_enlace(e1, e2)
-
-        tabla_comparacion.rows = [
-            ft.DataRow(
-                cells=[
-                    ft.DataCell(ft.Text("Elem 1")),
-                    ft.DataCell(ft.Text(str(e1.numero_atomico))),
-                    ft.DataCell(ft.Text(e1.simbolo, weight=ft.FontWeight.BOLD)),
-                    ft.DataCell(ft.Text(e1.nombre.title())),
-                    ft.DataCell(ft.Text(categoria_elemento(e1))),
-                    ft.DataCell(ft.Text(grupo_semiconductor(e1))),
-                ]
-            ),
-            ft.DataRow(
-                cells=[
-                    ft.DataCell(ft.Text("Elem 2")),
-                    ft.DataCell(ft.Text(str(e2.numero_atomico))),
-                    ft.DataCell(ft.Text(e2.simbolo, weight=ft.FontWeight.BOLD)),
-                    ft.DataCell(ft.Text(e2.nombre.title())),
-                    ft.DataCell(ft.Text(categoria_elemento(e2))),
-                    ft.DataCell(ft.Text(grupo_semiconductor(e2))),
-                ]
-            ),
-        ]
-        tabla_comparacion.visible = True
-
-        texto_enlace.value = f"Tipo de enlace: {enlace}"
-        if material:
-            texto_material.value = f"Material covalente: {material}"
-            texto_material.visible = True
-        else:
-            texto_material.visible = False
-
-        tarjeta_resultado.visible = True
-        page.update()
-
-    def limpiar_click(e):
-        input_elem1.value = ""
-        input_elem2.value = ""
-        mensaje_error.visible = False
-        tabla_comparacion.visible = False
